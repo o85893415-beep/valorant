@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DUCKERANT // 5v5 Tactical Shooter</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cloudflare.com"></script>
+  <script src="https://jsdelivr.net"></script>
+  <script src="https://unpkg.com"></script>
+</head>
+<body>
+  <!-- 1. COMPETITIVE LOBBY SCREEN -->
+  <div id="lobby-screen" class="screen">
+    <div class="lobby-top">
+      <div class="lobby-left-nav">
+        <div class="val-logo">V</div>
+        <div class="mode-title" id="lobby-mode-title">COMPETITIVE</div>
+      </div>
+      <div class="queue-timer">
+        <span class="queue-time" id="lobby-clock">00:00</span>
+        <small id="queue-status-text">READY TO QUEUE • FIRST TO 13</small>
+      </div>
+      <div class="party-badge">
+        <span id="party-privacy">CLOSED PARTY</span>
+        <div class="rank-pill" id="lobby-rank-badge">GOLD 2 • 54 RR</div>
+        <div class="profile-tag" id="top-profile-tag">Riot Player #NA1</div>
+      </div>
+    </div>
+
+    <div class="lobby-center">
+      <!-- LEFT PANEL: PARTY, MODE & MAP SELECT -->
+      <div class="squad-panel">
+        <h3>ONLINE PARTY &amp; SERVER</h3>
+        <div class="tag-row">
+          <input type="text" id="player-name" value="Riot Player" maxlength="16" />
+          <span class="status-dot">ONLINE</span>
+        </div>
+        <div class="room-actions">
+          <button class="btn-teal" onclick="Network.createRoom()">CREATE PARTY CODE</button>
+          <div class="join-row">
+            <input type="text" id="room-code-input" placeholder="Paste Party Code..." />
+            <button class="btn-outline" onclick="Network.joinRoom()">JOIN</button>
+          </div>
+        </div>
+        <div id="room-status" class="room-status">Solo Queue • Create a party code for friends</div>
+        <ul id="connected-players" class="player-list">
+          <li>Riot Player (Party Leader)</li>
+        </ul>
+
+        <h3 style="margin-top:10px">GAME MODE</h3>
+        <select id="mode-select" class="map-dropdown" onchange="document.getElementById('lobby-mode-title').innerText = this.value">
+          <option value="COMPETITIVE">COMPETITIVE (First to 13 • Ranked)</option>
+          <option value="UNRATED">UNRATED (First to 13 • Casual)</option>
+          <option value="SWIFTPLAY">SWIFTPLAY (First to 5 • Boosted Econ)</option>
+          <option value="SPIKE_RUSH">SPIKE RUSH (First to 4 • Random Guns + Orbs)</option>
+          <option value="DEATHMATCH">DEATHMATCH (40 Kills • Free-For-All)</option>
+          <option value="TDM">TEAM DEATHMATCH (100 Kills • 5v5)</option>
+          <option value="ESCALATION">ESCALATION (12-Level Gun Game)</option>
+        </select>
+
+        <h3 style="margin-top:10px">ACTIVE MAP POOL</h3>
+        <select id="map-select" class="map-dropdown">
+          <option value="HAVEN">HAVEN — Thimphu, Bhutan (3 Sites)</option>
+          <option value="BIND">BIND — Rabat, Morocco (Teleporters)</option>
+          <option value="ASCENT">ASCENT — Venice, Italy (Mid Arch)</option>
+          <option value="ICEBOX">ICEBOX — Bennett Island, Russia</option>
+          <option value="SPLIT">SPLIT — Tokyo, Japan (Heaven Ramps)</option>
+          <option value="LOTUS">LOTUS — Western Ghats, India (3 Sites)</option>
+          <option value="BREEZE">BREEZE — Bermuda Triangle</option>
+          <option value="FRACTURE">FRACTURE — Santa Fe, New Mexico</option>
+          <option value="PEARL">PEARL — Lisbon, Portugal</option>
+          <option value="SUNSET">SUNSET — Los Angeles, USA</option>
+          <option value="ABYSS">ABYSS — Jan Mayen, Norway (Fall Hazard)</option>
+        </select>
+      </div>
+      <!-- CENTER PANEL: 5-SLOT COMPETITIVE BANNERS -->
+      <div class="party-cards">
+        <div class="empty-slot">+</div>
+        <div class="player-card">
+          <div class="card-level">142</div>
+          <div class="card-banner" style="background:linear-gradient(180deg,#1d5fa7,#0f1923)">
+            <span class="banner-rank">PLAT 1</span>
+          </div>
+          <div class="card-ready">READY</div>
+          <div class="card-name">DIFFUSEMOOSE</div>
+          <div class="card-title">BALLISTIC</div>
+        </div>
+        <div class="player-card active">
+          <div class="card-level">208</div>
+          <div class="card-banner" id="lobby-agent-art">
+            <span class="banner-rank" id="card-rank-text">GOLD 2</span>
+          </div>
+          <div class="card-ready">READY</div>
+          <div class="card-name" id="card-player-name">Riot Player</div>
+          <div class="card-title" id="card-title-text">DEADEYE</div>
+        </div>
+        <div class="player-card">
+          <div class="card-level">325</div>
+          <div class="card-banner" style="background:linear-gradient(180deg,#18e0b8,#0f1923)">
+            <span class="banner-rank">GOLD 3</span>
+          </div>
+          <div class="card-ready">READY</div>
+          <div class="card-name">COCO ROCO</div>
+          <div class="card-title">TECHIE</div>
+        </div>
+        <div class="empty-slot">+</div>
+      </div>
+
+      <!-- RIGHT PANEL: RANK, SKINS, CROSSHAIR CODE & SETTINGS -->
+      <div class="agent-panel">
+        <h3>COMPETITIVE ACT RANK</h3>
+        <div class="rank-showcase">
+          <div class="rank-emblem" id="rank-emblem">G2</div>
+          <div>
+            <strong id="rank-name-display">GOLD 2</strong>
+            <div class="rr-bar"><div class="rr-fill" id="rr-fill" style="width:54%"></div></div>
+            <small id="rr-text">54 / 100 RR • Wins: <span id="career-wins">0</span></small>
+          </div>
+        </div>
+
+        <h3 style="margin-top:10px">COLLECTION // WEAPON SKIN</h3>
+        <select id="skin-select" class="map-dropdown">
+          <option value="STANDARD">STANDARD MATTE</option>
+          <option value="PRIME">PRIME // GOLD (Laser Tracers)</option>
+          <option value="REAVER">REAVER // SHADOW (Dark Soul VFX)</option>
+          <option value="ONI">ONI // DEMON (Emerald Mist)</option>
+          <option value="KURONAMI">KURONAMI // STORM (Storm Blue)</option>
+        </select>
+
+        <h3 style="margin-top:10px">CROSSHAIR PROFILE CODE</h3>
+        <div class="join-row">
+          <input type="text" id="crosshair-code" value="0;P;c;5;h;0;f;0;0l;4;0o;2;0a;1" />
+          <button class="btn-outline" onclick="Game.applyCrosshairCode()">IMPORT</button>
+        </div>
+
+        <h3 style="margin-top:10px">GRAPHICS &amp; SENSITIVITY</h3>
+        <label class="setting-row">Quality:
+          <select id="gfx-preset" onchange="Game.setGraphics(this.value)">
+            <option value="low">LOW (MAX FPS)</option>
+            <option value="high" selected>HIGH (SHADOWS)</option>
+          </select>
+        </label>
+        <label class="setting-row">Mouse Sens:
+          <input type="range" id="mouse-sens" min="0.5" max="3.0" step="0.1" value="1.0" />
+        </label>
+      </div>
+    </div>
+
+    <div class="lobby-footer">
+      <div class="val-brand"><span>V</span> DUCKERANT // TACTICAL 5v5</div>
+      <button class="start-btn" onclick="Game.enterAgentSelect()">START</button>
+      <div class="patch-note">PATCH 13.09 • 128-TICK WEB</div>
+    </div>
+  </div>
+  <!-- 2. AGENT SELECT SCREEN (80s Lock-In Timer) -->
+  <div id="agent-select-screen" class="screen" style="display:none">
+    <div class="as-top">
+      <div class="as-map-info">
+        <span id="as-map-name">HAVEN</span>
+        <small>SELECT FROM ALL 27 AGENTS</small>
+      </div>
+      <div class="as-timer" id="as-timer">75</div>
+      <div class="as-side">STARTING SIDE: <strong style="color:var(--val-teal)">ATTACKERS</strong></div>
+    </div>
+
+    <div class="as-middle">
+      <div class="as-team-list">
+        <div class="as-player-row locked"><span>DIFFUSEMOOSE</span><strong>OMEN</strong></div>
+        <div class="as-player-row active" id="as-my-row"><span id="as-my-name">Riot Player</span><strong id="as-my-pick">PICKING...</strong></div>
+        <div class="as-player-row locked"><span>COCO ROCO</span><strong>SAGE</strong></div>
+        <div class="as-player-row locked"><span>JETT_DIFF</span><strong>JETT</strong></div>
+        <div class="as-player-row locked"><span>SOVA_LINEUPS</span><strong>SOVA</strong></div>
+      </div>
+
+      <div class="as-preview">
+        <div class="as-role-tag" id="as-role">DUELIST</div>
+        <h1 id="as-agent-title">PHOENIX</h1>
+        <p id="as-agent-desc">Ignites the battlefield with Curveball flashes and Blaze walls.</p>
+        <div class="as-abilities-grid" id="as-abilities-list"></div>
+        <button class="lock-in-btn" onclick="Game.lockInAgent()">LOCK IN</button>
+      </div>
+    </div>
+
+    <div class="as-grid" id="agent-roster-grid"></div>
+  </div>
+  <!-- 3. MATCH LOADING SCREEN (5v5 Versus Banners) -->
+  <div id="loading-screen" class="screen" style="display:none">
+    <div class="load-header">
+      <h2 id="load-map-title">HAVEN</h2>
+      <p id="load-map-coords">27°28'A"N 89°38'E"W • THIMPHU, BHUTAN</p>
+    </div>
+
+    <div class="load-versus">
+      <div class="load-team blue" id="load-blue-team"></div>
+      <div class="vs-badge">VS</div>
+      <div class="load-team red" id="load-red-team"></div>
+    </div>
+
+    <div class="load-footer">
+      <div class="load-bar"><div class="load-progress" id="load-progress"></div></div>
+      <small>LOADING 128-TICK TACTICAL ARENA...</small>
+    </div>
+  </div>
+  <!-- 4. BUY PHASE ARMORY (Press B) -->
+  <div id="buy-menu">
+    <div class="buy-grid">
+      <div class="team-econ">
+        <div class="my-creds">
+          <span>CREDITS</span>
+          <strong>¤ <span id="buy-credits">800</span></strong>
+          <small>MIN NEXT ROUND: ¤ <span id="min-next-round">1,900</span></small>
+        </div>
+        <div class="econ-row"><span>DIFFUSEMOOSE</span><span>¤ 2,400</span></div>
+        <div class="econ-row"><span>COCO ROCO</span><span>¤ 2,100</span></div>
+        <div class="econ-row"><span>JETT_DIFF</span><span>¤ 1,800</span></div>
+        <div class="econ-row"><span>SOVA_LINEUPS</span><span>¤ 2,500</span></div>
+        <div class="buy-calls">
+          <button onclick="Game.logKill('TEAM CHAT: Let\'s Buy!')">LET'S BUY</button>
+          <button onclick="Game.logKill('TEAM CHAT: Save Round!')">LET'S SAVE</button>
+        </div>
+      </div>
+
+      <div class="arsenal-cols" id="arsenal-container"></div>
+
+      <div class="weapon-inspector">
+        <h4 id="insp-name">VANDAL</h4>
+        <div class="insp-cat" id="insp-cat">RIFLE • ¤ 2,900</div>
+        <div class="insp-stat"><span>FIRE RATE</span><strong id="insp-rate">10.00 RDS/SEC</strong></div>
+        <div class="insp-stat"><span>MAGAZINE</span><strong id="insp-mag">25 / 75</strong></div>
+        <div class="insp-stat"><span>WALL PENETRATION</span><strong id="insp-pen">MEDIUM</strong></div>
+        <div class="insp-dmg-table">
+          <div><span>HEAD</span><strong id="insp-head">160</strong></div>
+          <div><span>BODY</span><strong id="insp-body">40</strong></div>
+          <div><span>LEGS</span><strong id="insp-legs">34</strong></div>
+        </div>
+        <p class="insp-tip">Right-click any owned gun to sell for a full refund. Press [G] in-game to drop guns.</p>
+      </div>
+
+      <div class="shop-footer">
+        <span>GUNPLAY: Stand still or hold [Shift] before firing. Running causes heavy bullet spread!</span>
+        <button class="btn-teal" onclick="Game.toggleBuyMenu(false)">CLOSE ARMORY [B]</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. SCOREBOARD (Hold Tab) -->
+  <div id="scoreboard">
+    <h3>COMPETITIVE SCOREBOARD • FIRST TO 13 ROUNDS</h3>
+    <table>
+      <thead><tr><th>PLAYER</th><th>AGENT</th><th>RANK</th><th>K / D</th><th>CREDS</th><th>STATUS</th></tr></thead>
+      <tbody id="scoreboard-body"></tbody>
+    </table>
+  </div>
+  <!-- 6. IN-GAME VALORANT HUD -->
+  <div id="hud">
+    <div id="flash-overlay"></div>
+    <div id="smoke-overlay"></div>
+
+    <div class="top-bar">
+      <div class="team-portraits left">
+        <span class="agent-pip alive">P</span>
+        <span class="agent-pip alive">O</span>
+        <span class="agent-pip alive">S</span>
+        <span class="agent-pip alive">J</span>
+        <span class="agent-pip alive">V</span>
+      </div>
+      <div class="score-atk" id="score-atk">0</div>
+      <div class="timer-box">
+        <div id="side-label">ATTACKERS • ROUND 1</div>
+        <div class="round-timer" id="round-timer">0:15</div>
+      </div>
+      <div class="score-def" id="score-def">0</div>
+      <div class="team-portraits right" id="enemy-pips">
+        <span class="agent-pip alive">R</span>
+        <span class="agent-pip alive">V</span>
+        <span class="agent-pip alive">K</span>
+        <span class="agent-pip alive">C</span>
+        <span class="agent-pip alive">S</span>
+      </div>
+    </div>
+
+    <div class="phase-banner" id="phase-banner">BUY PHASE — PRESS [B] TO OPEN ARMORY | CLICK SCREEN TO AIM</div>
+    <div id="killfeed"></div>
+
+    <div id="combat-report">
+      <h4>COMBAT REPORT</h4>
+      <div id="cr-dealt">DEALT: 0 (0 Head • 0 Body)</div>
+      <div id="cr-taken">TAKEN: 0 (0 Head • 0 Body)</div>
+    </div>
+
+    <div id="spike-prompt">HOLD OR [F] AT SITE TO PLANT SPIKE</div>
+    <div id="interact-prompt">PRESS [E] TO PICK UP WEAPON / INTERACT</div>
+
+    <div id="defuse-bar-wrap" style="display:none">
+      <div id="defuse-label">DEFUSING SPIKE...</div>
+      <div class="defuse-track"><div id="defuse-fill"></div></div>
+    </div>
+
+    <div id="crosshair">
+      <div class="ch-line" id="ch-top"></div>
+      <div class="ch-line" id="ch-bot"></div>
+      <div class="ch-line" id="ch-left"></div>
+      <div class="ch-line" id="ch-right"></div>
+    </div>
+
+    <div class="bottom-hud">
+      <div class="vitals">
+        <div class="vital-box"><span>SHIELD</span><strong id="hud-shield">0</strong></div>
+        <div class="vital-box"><span>HEALTH</span><strong id="hud-hp">100</strong></div>
+      </div>
+
+      <div class="abilities-bar">
+        <div class="ability-slot ready" id="slot-c"><div class="ability-key">[C]</div><div class="ability-name" id="ab-c">WALL</div></div>
+        <div class="ability-slot ready" id="slot-q"><div class="ability-key">[Q]</div><div class="ability-name" id="ab-q">FLASH</div></div>
+        <div class="ability-slot ready" id="slot-e"><div class="ability-key">[E]</div><div class="ability-name" id="ab-e">SIGNATURE</div></div>
+        <div class="ability-slot" id="slot-x"><div class="ability-key">[X]</div><div class="ability-name" id="ab-x">0 / 6</div></div>
+      </div>
+
+      <div class="weapon-hud">
+        <div class="weapon-label" id="hud-weapon">CLASSIC</div>
+        <div class="ammo-count"><span id="hud-ammo">12</span> <small id="hud-reserve">/ 36</small></div>
+        <div class="controls-hint">[1/2] Gun | [3] Knife | [G] Drop | [Z] Ping | [B] Buy</div>
+      </div>
+    </div>
+  </div>
+  <!-- 7. POST-MATCH RANK & RR SCREEN -->
+  <div id="post-match-screen" class="screen" style="display:none">
+    <div class="pm-header">
+      <h1 id="pm-result">VICTORY</h1>
+      <div class="pm-score" id="pm-score">13 - 8</div>
+    </div>
+    <div class="pm-rank-card">
+      <div class="rank-emblem large" id="pm-rank-emblem">G2</div>
+      <div>
+        <h2 id="pm-rank-title">GOLD 2</h2>
+        <div class="pm-rr-change" id="pm-rr-change">+24 RR (MATCH MVP)</div>
+        <div class="rr-bar"><div class="rr-fill" id="pm-rr-fill" style="width:78%"></div></div>
+      </div>
+    </div>
+    <button class="start-btn" onclick="location.reload()">PLAY AGAIN</button>
+  </div>
+
+  <!-- MODULE SCRIPTS IN EXACT DEPENDENCY ORDER -->
+  <script src="data.js"></script>
+  <script src="textures.js"></script>
+  <script src="models.js"></script>
+  <script src="physics_vfx.js"></script>
+  <script src="network.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
